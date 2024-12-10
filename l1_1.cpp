@@ -4,6 +4,7 @@
 #include <string>
 #include <limits>
 #include <filesystem>
+#include <iostream>
 
 #include <cfloat> // Для DBL_MAX
 
@@ -51,7 +52,8 @@ EXPORT std::filesystem::path getThisLibraryPath() {
 EXPORT std::string getOutputPath() {
     std::filesystem::path executablePath = getThisLibraryPath();
     std::filesystem::path outputPath = executablePath.parent_path() / ".." / ".." / "output" / "output_1.csv";
-    return outputPath.string();
+    //return outputPath.string();
+    return "output_1.csv";
 }
 
 
@@ -80,7 +82,7 @@ const int NMAX = 10000;
 // Returns:
 //     Значение функции f(x, y) (double)
 extern "C" EXPORT
-    double f(const double &x, const double &y)
+    double rhs(const double &x, const double &y)
     {
         return pow(y, 2)*x / ( 1+pow(x, 2) ) + y - pow(y, 3)*std::sin(10 * x);
     }
@@ -97,10 +99,10 @@ extern "C" EXPORT
 extern "C" EXPORT
     double RK_4_Step(const double &x, const double &y,const double &h)
     {
-        double k1 = h * f(x, y);
-        double k2 = h * f(x + h / 2, y + k1 / 2);
-        double k3 = h * f(x + h / 2, y + k2 / 2);
-        double k4 = h * f(x + h, y + k3);
+        double k1 = h * rhs(x, y);
+        double k2 = h * rhs(x + h / 2, y + k1 / 2);
+        double k3 = h * rhs(x + h / 2, y + k2 / 2);
+        double k4 = h * rhs(x + h, y + k3);
 
         double y_next = y + (k1 + 2 * k2 + 2 * k3 + k4) / 6;
 
@@ -231,8 +233,8 @@ extern "C" EXPORT
 int main()
 {
     setlocale(LC_ALL, "Russian");
-
-    //RK_4_adaptive(X0, Y0, H0, XMAX, EPS, EPS_OUT, NMAX);
+    std::cout << "Я начал работу";
+    RK_4_adaptive(X0, Y0, H0, XMAX, EPS, EPS_OUT, NMAX);
     //RK_4(X0, Y0, H0, XMAX, EPS, EPS_OUT, NMAX);
 
 

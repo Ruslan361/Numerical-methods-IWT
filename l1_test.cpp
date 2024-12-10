@@ -71,7 +71,8 @@ EXPORT std::filesystem::path getThisLibraryPath() {
 EXPORT std::string getOutputPath() {
     std::filesystem::path executablePath = getThisLibraryPath();
     std::filesystem::path outputPath = executablePath.parent_path() / ".." / ".." / "output" / "output_test.csv";
-    return outputPath.string();
+    //return outputPath.string();
+    return "output_test.csv";
 }
 
 #define OUT_PATH getOutputPath().c_str()
@@ -83,8 +84,8 @@ EXPORT std::string getOutputPath() {
 // Returns:
 //     Значение функции f(x, y) (double)
 extern "C" EXPORT
-    double f(const double &x, const double &y) {
-        return y;                                           
+    double rhs(double x, double I, double L, double R, double E0, double omega) {
+    return (E0 * sin(omega * x) - R * I) / L;
     }
 
 
@@ -95,9 +96,20 @@ extern "C" EXPORT
 // Returns:
 //     Значение аналитического решения u(x, C) (double)
 extern "C" EXPORT
-    double u(const double &x, const double &C)
+    double calculateRealSolution(double x, double L, double R, double E0, double omega, double I0)
     {
-        return C * (std::exp(x));
+        // Коэффициенты для решения
+        double A = E0 * R / (R * R + L * L * omega * omega);
+        double B = -E0 * L * omega / (R * R + L * L * omega * omega);
+        double C = I0 + E0 * L * omega / (R * R + L * L * omega * omega);
+
+        // Вычисление значения тока
+        double exponentialPart = C * std::exp(-R * x / L);
+        double sinusoidalPart = A * std::sin(omega * x);
+        double cosinusoidalPart = B * std::cos(omega * x);
+
+        // Итоговое значение
+        return exponentialPart + sinusoidalPart + cosinusoidalPart;
     }
 
 
@@ -109,12 +121,12 @@ extern "C" EXPORT
 // Returns:
 //     Значение y на следующем шаге (double)
 extern "C" EXPORT
-double RK_4_Step(const double &x, const double &y,const double &h)
+double RK_4_Step(const double &x, const double &y,const double &h, double L, double R, double E0, double omega)
 {
-    double k1 = h * f(x, y);
-    double k2 = h * f(x + h / 2., y + k1 / 2.);
-    double k3 = h * f(x + h / 2., y + k2 / 2.);
-    double k4 = h * f(x + h, y + k3);
+    double k1 = h * rhs(x, y, L, R, E0, omega);
+    double k2 = h * rhs(x + h / 2., y + k1 / 2., L, R, E0, omega);
+    double k3 = h * rhs(x + h / 2., y + k2 / 2., L, R, E0, omega);
+    double k4 = h * rhs(x + h, y + k3, L, R, E0, omega);
 
     double y_next = y + (k1 + 2. * k2 + 2. * k3 + k4) / 6.;
 
@@ -135,7 +147,7 @@ double RK_4_Step(const double &x, const double &y,const double &h)
 // Returns:
 //     0 - если вычисления прошли успешно.
 extern "C" EXPORT
-int RK_4(double x0, double y0, double h, double xmax, int Nmax)
+int RK_4(double x0, double y0, double h, double xmax, int Nmax, double L, double R, double E0, double omega)
 {
     int step = 0;
     double x = x0;
@@ -144,10 +156,9 @@ int RK_4(double x0, double y0, double h, double xmax, int Nmax)
     std::ofstream output(OUT_PATH);
     output << "x;v;u" << std::endl;     // Заголовок CSV с разделителем ;
     while (x+h <= xmax && step < Nmax) {
-        y = RK_4_Step(x, y, h);
+        y = RK_4_Step(x, y, h, L, R, E0, omega);
         x = x + h;
-
-        output << x << ";" << y << ";" << u(x, y0) << std::endl;
+        output << x << ";" << y << ";" << calculateRealSolution(x, L, R, E0, omega, y0) << std::endl;
         ++step;
     }
 
@@ -166,7 +177,7 @@ int RK_4(double x0, double y0, double h, double xmax, int Nmax)
 // Returns:
 //     0 - если вычисления прошли успешно
 extern "C" EXPORT
-int RK_4_adaptive(double x0, double y0, double h0, double xmax, double eps, double eps_out, int Nmax)
+int RK_4_adaptive(double x0, double y0, double h0, double xmax, double eps, double eps_out, int Nmax, double L, double R, double E0, double omega)
 {
     double x = x0;
     double y = y0;
@@ -186,9 +197,9 @@ int RK_4_adaptive(double x0, double y0, double h0, double xmax, double eps, doub
     while (x + h <= xmax && std::abs(x - xmax) > eps_out && step < Nmax) {
 
         // Делаем шаг методом Рунге-Кутта с h и два шага с h/2
-        y1 = RK_4_Step(x, y, h);
-        y2 = RK_4_Step(x, y, h / 2);
-        y2 = RK_4_Step(x + h / 2, y2, h / 2);
+        y1 = RK_4_Step(x, y, h, L, R, E0, omega);
+        y2 = RK_4_Step(x, y, h / 2, L, R, E0, omega);
+        y2 = RK_4_Step(x + h / 2, y2, h / 2, L, R, E0, omega);
 
         // Вычисляем оценку локальной погрешности
         error = (std::abs(y1 - y2)) / (pow(2, p) - 1);     //2^p-1 - знаменатель в формуле вычисления О.Л.П
@@ -205,7 +216,7 @@ int RK_4_adaptive(double x0, double y0, double h0, double xmax, double eps, doub
             c2++;
 
             //2^p
-            output << x << ";" << y << ";" << y2 << ";" << y-y2 << ";" << error * pow(2, p) << ";" << h << ";" << c1 << ";" << c2 << ";" << u(x, y0) << ";" << std::fabs(u(x, y0) - y) << std::endl;
+            output << x << ";" << y << ";" << y2 << ";" << y-y2 << ";" << error * pow(2, p) << ";" << h << ";" << c1 << ";" << c2 << ";" << calculateRealSolution(x, L, R, E0, omega, y0) << ";" << std::fabs(calculateRealSolution(x, L, R, E0, omega, y0) - y) << std::endl;
             
             h *= 2;
             ++step;
@@ -215,7 +226,7 @@ int RK_4_adaptive(double x0, double y0, double h0, double xmax, double eps, doub
             y = y1;
             x += h;  //Увеличиваем шаг перед выводом, т.к. метод Р.К. считает значение в следующей точке
             //2^p
-            output << x << ";" << y << ";" << y2 << ";" << y-y2 << ";" << error * pow(2, p) << ";" << h << ";" << c1 << ";" << c2 << ";" << u(x, y0) << ";" << std::fabs(u(x, y0) - y) << std::endl;
+            output << x << ";" << y << ";" << y2 << ";" << y-y2 << ";" << error * pow(2, p) << ";" << h << ";" << c1 << ";" << c2 << ";" << calculateRealSolution(x, L, R, E0, omega, y0) << ";" << std::fabs(calculateRealSolution(x, L, R, E0, omega, y0) - y) << std::endl;
             
             
             ++step;
@@ -227,11 +238,11 @@ int RK_4_adaptive(double x0, double y0, double h0, double xmax, double eps, doub
         h = xmax - x;
         //++c1;
         // Делаем шаг методом Рунге-Кутта с h и два шага с h/2
-        y1 = RK_4_Step(x, y, h);
-        y2 = RK_4_Step(x, y, h / 2);
-        y2 = RK_4_Step(x + h / 2, y2, h / 2);
+        y1 = RK_4_Step(x, y, h, L, R, E0, omega);
+        y2 = RK_4_Step(x, y, h / 2, L, R, E0, omega);
+        y2 = RK_4_Step(x + h / 2, y2, h / 2, L, R, E0, omega);
 
-        output << x+h << ";" << y1 << ";" << y2 << ";" << y1-y2 << ";" << error * pow(2, p) << ";" << h << ";" << c1 << ";" << c2 << ";" << u(x, y0) << ";" << std::fabs(u(x, y0) - y) << std::endl;
+        output << x+h << ";" << y1 << ";" << y2 << ";" << y1-y2 << ";" << error * pow(2, p) << ";" << h << ";" << c1 << ";" << c2 << ";" << calculateRealSolution(x, L, R, E0, omega, y0) << ";" << std::fabs(calculateRealSolution(x, L, R, E0, omega, y0) - y) << std::endl;
 
     }
 
@@ -246,7 +257,7 @@ int main()
 {
     setlocale(LC_ALL, "Russian");
 
-    //RK_4_adaptive(X0, Y0, H0, XMAX, EPS, EPS_OUT, NMAX);
+    RK_4_adaptive(X0, Y0, H0, XMAX, EPS, EPS_OUT, NMAX, 1, 1, 1, 0);
     //RK_4(X0, Y0, H0, XMAX, EPS, EPS_OUT, NMAX);
 
     return 0;
