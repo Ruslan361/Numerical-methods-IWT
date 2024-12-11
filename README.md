@@ -111,5 +111,15 @@ Math GPT $I(x) = \left( I_0 + \frac{E_0 L \omega}{R^2 + L^2 \omega^2} \right) e^
 pip install setuptools>=61 wheel Cython numpy
 
 cd /path/to/calculation
+
+windows
+``` bash
+https://visualstudio.microsoft.com/ru/visual-cpp-build-tools/
+```
+pip install --user build
+
+linux
+
 python -m build
+
 pip install dist/calculation-0.1.2-...-.whl
