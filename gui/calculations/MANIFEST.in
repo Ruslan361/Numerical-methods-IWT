@@ -1,5 +1,4 @@
 include calculation.pyx
-include calculation.cpp
 include calculation_lib.cpp
 include calculation_lib.h
 include calculation_lib.pxd

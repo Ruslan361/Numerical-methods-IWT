@@ -7,10 +7,10 @@
             "calculation_lib.h"
         ],
         "extra_compile_args": [
-            "-std=c++11"
+            "/std:c++11"
         ],
         "include_dirs": [
-            "/tmp/build-env-0wge3wjq/lib/python3.11/site-packages/numpy/_core/include",
+            "C:\\Users\\Professional\\AppData\\Local\\Temp\\build-env-aexhjfre\\Lib\\site-packages\\numpy\\_core\\include",
             "."
         ],
         "language": "c++",

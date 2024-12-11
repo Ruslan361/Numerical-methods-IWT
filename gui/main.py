@@ -1,4 +1,4 @@
-from test_task import *
+from test_task import TabTestTask
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtWidgets import QMainWindow, QTabWidget
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas

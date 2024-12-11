@@ -8,3 +8,4 @@ l1_1.exe
 dist
 calculation.egg-info
 __pycache__
+*.so
