@@ -113,13 +113,27 @@ pip install setuptools>=61 wheel Cython numpy
 cd /path/to/calculation
 
 windows
-``` bash
+
 https://visualstudio.microsoft.com/ru/visual-cpp-build-tools/
-```
+
+``` bash
 pip install --user build
+```
+
+``` bash
+pip install -m build
+```
+
+``` bash
+pip install dist/calculation-0.1.2-...-.whl
+```
 
 linux
 
+``` bash
 python -m build
+```
 
+``` bash
 pip install dist/calculation-0.1.2-...-.whl
+```
