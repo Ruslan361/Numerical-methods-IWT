@@ -5,3 +5,6 @@ output_test.csv
 a.out
 .vscode
 l1_1.exe
+dist
+calculation.egg-info
+__pycache__
