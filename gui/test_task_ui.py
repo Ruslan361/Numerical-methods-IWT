@@ -28,21 +28,21 @@ class TestTaskUI:
 
 
     def _add_parameters(self):
-        table_layout = QGridLayout()
+        self.additition_parameters = QGridLayout()
 
         self.L_input = FloatNumberInput("L")
-        table_layout.addLayout(self.L_input, 0, 0)
+        self.additition_parameters.addLayout(self.L_input, 0, 0)
 
         self.R_input = FloatNumberInput("R")
-        table_layout.addLayout(self.R_input, 0, 1)
+        self.additition_parameters.addLayout(self.R_input, 0, 1)
 
         self.E0_input = FloatNumberInput("E0")
-        table_layout.addLayout(self.E0_input, 1, 0)
+        self.additition_parameters.addLayout(self.E0_input, 1, 0)
 
         self.omega_input = FloatNumberInput("omega")
-        table_layout.addLayout(self.omega_input, 1, 1)
+        self.additition_parameters.addLayout(self.omega_input, 1, 1)
 
-        self.main_layout.addLayout(table_layout)
+        self.main_layout.addLayout(self.additition_parameters)
 
     def _add_task_description(self):
         test_task_layout = LatexRendererLayout()
@@ -85,26 +85,26 @@ class TestTaskUI:
         self.main_layout.addLayout(self.graph_layout, 3)
 
     def _add_buttons(self):
-        about_layout = QHBoxLayout()
+        self.about_layout = QHBoxLayout()
         reference_button = QPushButton()
         reference_button.setText("Справка")
         reference_button.clicked.connect(self.parent().referenceButtonClick)  # Вызов метода referenceButtonClick родительского класса
-        about_layout.addWidget(reference_button)
+        self.about_layout.addWidget(reference_button)
         show_table_button = QPushButton()
         show_table_button.setText("Вывести таблицу")
         show_table_button.clicked.connect(self.parent().ShowTableButtonClick)  # Вызов метода ShowTableButtonClick родительского класса
-        about_layout.addWidget(show_table_button)
+        self.about_layout.addWidget(show_table_button)
 
         save_settings_button = QPushButton()
         save_settings_button.setText("Сохранить настройки")
         save_settings_button.clicked.connect(self.parent().saveSettings)  # Вызов метода saveSettings родительского класса
-        about_layout.addWidget(save_settings_button)
+        self.about_layout.addWidget(save_settings_button)
         load_settings_button = QPushButton()
         load_settings_button.setText("Загрузить настройки")
         load_settings_button.clicked.connect(self.parent().loadSettings)  # Вызов метода loadSettings родительского класса
-        about_layout.addWidget(load_settings_button)
+        self.about_layout.addWidget(load_settings_button)
 
-        self.main_layout.addLayout(about_layout)
+        self.main_layout.addLayout(self.about_layout)
 
     def parent(self):
         return self.main_layout.parent()

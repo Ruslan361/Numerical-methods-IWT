@@ -51,7 +51,7 @@ struct Data {
     double v;
     double v2i;
     double v_minus_v2i;
-    double E;
+    double e;
     double h;
     int c1;
     int c2;
@@ -230,7 +230,7 @@ void addData(std::queue<Data>& q, double x, double y, double y2, double error, i
     data.v = y;
     data.v2i = y2;
     data.v_minus_v2i = y - y2;
-    data.E = error * pow(2, p);
+    data.e = error * pow(2, p);
     data.h = h;
     data.c1 = c1;
     data.c2 = c2;

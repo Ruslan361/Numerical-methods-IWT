@@ -37,9 +37,13 @@ class TabTestTask(QWidget):
             "showNumericSolveCheckBox": self.ui.show_numeric_solve_checkbox,
             "showRealSolveCheckBox": self.ui.show_real_solve_checkbox,
             "amountOfStepsInput": self.ui.amount_of_steps_input,
-            "parent": self  # Добавлено для доступа к методам TabTestTask
+            "omega_input": self.ui.omega_input,
+            "R_input": self.ui.R_input,
+            "L_input": self.ui.L_input,
+            "E0_input": self.ui.E0_input,
+            "parent": self
         })
-        self.loadSettings()  # Загрузка настроек после создания UI
+        # self.loadSettings()  # Загрузка настроек после создания UI
 
     def calculateClick(self):
         # ... (код для получения параметров из UI)
@@ -50,12 +54,15 @@ class TabTestTask(QWidget):
 
     def _validate_input(self):
         # ... (код для валидации входных данных)
-        x_end = self.ui.xlimits_input.getEndX()
-        x0 = self.ui.initial_conditions.getX0()
-        amount_of_steps = self.ui.amount_of_steps_input.getIntNumber()
-        h0 = self.ui.numerical_integration_parameters_input.getStartStep()
-        local_error = self.ui.numerical_integration_parameters_input.getEpsilonLocalError()
-
+        try:
+            x_end = self.ui.xlimits_input.getEndX()
+            x0 = self.ui.initial_conditions.getX0()
+            amount_of_steps = self.ui.amount_of_steps_input.getIntNumber()
+            h0 = self.ui.numerical_integration_parameters_input.getStartStep()
+            local_error = self.ui.numerical_integration_parameters_input.getEpsilonLocalError()
+        except ValueError as e:
+            self.show_error(f"Ошибка: {e}")
+            return False
         if x_end <= x0:
             self.show_error("Ошибка: Конечное значение X должно быть больше начального.")
             return False
@@ -75,20 +82,21 @@ class TabTestTask(QWidget):
         return True  # Возвращаем True, если все данные валидны
 
     def _perform_calculation(self):
-        # ... (код для выполнения вычислений)
-        x_end = self.ui.xlimits_input.getEndX()
-        x0 = self.ui.initial_conditions.getX0()
-        u_x0 = self.ui.initial_conditions.getUX0()
-        epsilon_border = self.ui.xlimits_input.getEndEpsilon()
-        amountOfSteps = self.ui.amount_of_steps_input.getIntNumber()
-        h0 = self.ui.numerical_integration_parameters_input.getStartStep()
-        local_error = self.ui.numerical_integration_parameters_input.getEpsilonLocalError()
-        self.to_be_control_local_error = self.ui.numerical_integration_parameters_input.isControlLocalError()
-        L = self.ui.L_input.getFloatNumber()
-        R = self.ui.R_input.getFloatNumber()
-        E0 = self.ui.E0_input.getFloatNumber()
-        omega = self.ui.omega_input.getFloatNumber()
         try:
+            # ... (код для выполнения вычислений)
+            x_end = self.ui.xlimits_input.getEndX()
+            x0 = self.ui.initial_conditions.getX0()
+            u_x0 = self.ui.initial_conditions.getUX0()
+            epsilon_border = self.ui.xlimits_input.getEndEpsilon()
+            amountOfSteps = self.ui.amount_of_steps_input.getIntNumber()
+            h0 = self.ui.numerical_integration_parameters_input.getStartStep()
+            local_error = self.ui.numerical_integration_parameters_input.getEpsilonLocalError()
+            self.to_be_control_local_error = self.ui.numerical_integration_parameters_input.isControlLocalError()
+            L = self.ui.L_input.getFloatNumber()
+            R = self.ui.R_input.getFloatNumber()
+            E0 = self.ui.E0_input.getFloatNumber()
+            omega = self.ui.omega_input.getFloatNumber()
+            print(f"{self.to_be_control_local_error}")
             if self.to_be_control_local_error:
                 self.df = self.rk4_adaptive_calculator.calculate(x0, u_x0, h0, x_end, local_error, epsilon_border, amountOfSteps, L, R, E0, omega)
             else:
@@ -100,9 +108,9 @@ class TabTestTask(QWidget):
         if self.df is not None:
             self.plotter.plot(self.getColumnValues(self.df, 'x'), self.getColumnValues(self.df, 'v'), self.getColumnValues(self.df, 'u'))
 
-    def closeEvent(self, event):
-        self.saveSettings()
-        event.accept()
+    # def closeEvent(self, event):
+    #     self.saveSettings()
+    #     event.accept()
 
     def ShowTableButtonClick(self):
         if self.df is None:
@@ -118,7 +126,7 @@ class TabTestTask(QWidget):
         if self.ui.numerical_integration_parameters_input.isControlLocalError():
             self.columns = ['x', 'v', 'v2i', 'v-v2i', 'e', 'h', 'c1', 'c2', 'u', '|ui-vi|']
         else:
-            self.columns = ['x', 'v', 'u']
+            self.columns = ['x', 'v', 'u', '|ui-vi|']
 
         table.setColumnCount(len(self.columns))
         table.setRowCount(len(self.df))
@@ -154,7 +162,7 @@ class TabTestTask(QWidget):
             current_dir = os.path.join(current_dir, "..") 
             current_dir = os.path.join(current_dir, "output")
             file_path = os.path.join(current_dir, "output_test.csv")
-            if to_be_control_local_error:
+            if self.to_be_control_local_error:
                 self.df = pd.read_csv(file_path, delimiter=";", header=None,
                                  names=['x', 'v', 'v2i', 'v-v2i', 'e', 'h', 'c1', 'c2', 'u', '|ui-vi|'])
             else:

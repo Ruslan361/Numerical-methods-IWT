@@ -32,10 +32,16 @@ class TestTaskSettingsManager:
                 "epsilon": self.ui_elements["numericalIntegrationParametersInput"].epsilonInput.floatNumberLineEdit.text(),
                 "to_be_control_local_error": self.ui_elements["numericalIntegrationParametersInput"].isControlLocalError()
             },
+            "additionalParameters": {
+                "omega": self.ui_elements["omega_input"].floatNumberLineEdit.text(),
+                "R": self.ui_elements["R_input"].floatNumberLineEdit.text(),
+                "L": self.ui_elements["L_input"].floatNumberLineEdit.text(),
+                "E0": self.ui_elements["E0_input"].floatNumberLineEdit.text()
+            },
             "showNumericSolve": self.ui_elements["showNumericSolveCheckBox"].isChecked(),
             "showRealSolve": self.ui_elements["showRealSolveCheckBox"].isChecked(),
             "amountOfSteps": self.ui_elements["amountOfStepsInput"].intNumberLineEdit.text(),
-            "csv_filename": os.path.relpath(csv_filename, os.path.dirname(filename)),  # Относительный путь
+            "csv_filename": os.path.relpath(csv_filename, os.path.dirname(filename)),
             "task_number": 0
         }
 
@@ -69,6 +75,10 @@ class TestTaskSettingsManager:
                 self.ui_elements["numericalIntegrationParametersInput"].h0Input.floatNumberLineEdit.setText(settings["numericalIntegrationParameters"]["h0"])
                 self.ui_elements["numericalIntegrationParametersInput"].controlLocalErrorCheckBox.setChecked(settings["numericalIntegrationParameters"]["controlLocalError"])
                 self.ui_elements["numericalIntegrationParametersInput"].epsilonInput.floatNumberLineEdit.setText(settings["numericalIntegrationParameters"]["epsilon"])
+                self.ui_elements["omega_input"].floatNumberLineEdit.setText(settings["additionalParameters"]["omega"])
+                self.ui_elements["R_input"].floatNumberLineEdit.setText(settings["additionalParameters"]["R"])
+                self.ui_elements["L_input"].floatNumberLineEdit.setText(settings["additionalParameters"]["L"])
+                self.ui_elements["E0_input"].floatNumberLineEdit.setText(settings["additionalParameters"]["E0"])
                 self.ui_elements["showNumericSolveCheckBox"].setChecked(settings["showNumericSolve"])
                 self.ui_elements["showRealSolveCheckBox"].setChecked(settings["showRealSolve"])
                 self.ui_elements["amountOfStepsInput"].intNumberLineEdit.setText(settings["amountOfSteps"])
@@ -76,7 +86,7 @@ class TestTaskSettingsManager:
 
                 csv_filename = os.path.join(os.path.dirname(filename), settings["csv_filename"])
                 self.ui_elements["parent"].load_dataframe(csv_filename, self.ui_elements["numericalIntegrationParametersInput"].isControlLocalError())
-                self.ui_elements["parent"].refreshPlot()  # Обновление графика после загрузки
+                self.ui_elements["parent"].refreshPlot()
 
                 print(f"Настройки загружены из файла {filename}")
             except Exception as e:

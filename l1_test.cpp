@@ -201,7 +201,7 @@ struct Data {
     double v;
     double v2i;
     double v_minus_v2i;
-    double E;
+    double e;
     double h;
     int c1;
     int c2;
@@ -217,7 +217,7 @@ void addData(std::queue<Data>& q, double x, double y, double y2, double error, i
     data.v = y;
     data.v2i = y2;
     data.v_minus_v2i = y - y2;
-    data.E = error * pow(2, p);
+    data.e = error * pow(2, p);
     data.h = h;
     data.c1 = c1;
     data.c2 = c2;
@@ -321,7 +321,7 @@ int main()
 
     for (const auto& result : results) {
         std::cout << "x: " << result.x << ", v: " << result.v << ", v2i: " << result.v2i 
-                  << ", v-v2i: " << result.v_minus_v2i << ", E: " << result.E 
+                  << ", v-v2i: " << result.v_minus_v2i << ", E: " << result.e 
                   << ", h: " << result.h << ", c1: " << result.c1 << ", c2: " << result.c2 
                   << ", u: " << result.u << ", |ui-vi|: " << result.abs_ui_minus_vi << std::endl;
     }

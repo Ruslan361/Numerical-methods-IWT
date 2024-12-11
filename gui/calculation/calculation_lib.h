@@ -13,7 +13,7 @@ struct Data {
     double v;
     double v2i;
     double v_minus_v2i;
-    double E;
+    double e;
     double h;
     int c1;
     int c2;

@@ -36,7 +36,9 @@ class RK4AdaptiveCalculator(Calculator):
             #print()
             #print(result)
             #print()
-            return pd.DataFrame(result)
+            # return pd.DataFrame(result, columns=['x', 'v', 'v2i', 'v-v2i', 'e', 'h', 'c1', 'c2', 'u', '|ui-vi|'])
+            return pd.DataFrame(result, dtype=float)
+            #x;v;v2i;v-v2i;E;h;c1;c2;u;|ui-vi|
             # Конвертируем результат в DataFrame
             # self.parent.df = pd.DataFrame(result)
         except Exception as e:

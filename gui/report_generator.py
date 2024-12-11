@@ -15,7 +15,12 @@ class ReportGenerator:
         difference_between_the_right_border_and_the_last_calculated_point = abs(
             x[l - 1] - self.xlimits_input.getEndX())
         report += f'разница между правой границей и последней вычисленной точки: {difference_between_the_right_border_and_the_last_calculated_point}\n'
-        if 'e' in self.df.columns:  # Проверка наличия столбца 'e'
+        report += self.generate_error_report(report, x, symbol='e')
+        report += self.generate_error_report(report, x, symbol='E')
+        return report
+
+    def generate_error_report(self, report, x, symbol):
+        if symbol in self.df.columns:  # Проверка наличия столбца 'e'
             E = self.getColumnValues('e')
             maxError = max(E)
             max_error_index = E.index(maxError)
@@ -40,7 +45,8 @@ class ReportGenerator:
             difference = np.abs(u - v)
             maxDifference = np.max(difference)
             report += f'Максимальная разница численного и реального решения {maxDifference}'
-        return report
+            return report
+        return ""
 
     def getColumnValues(self, column):
         return pd.to_numeric(self.df[column][1:], errors='coerce').dropna().tolist()
