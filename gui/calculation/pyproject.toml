@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61", "wheel", "Cython", "numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "calculation"  # Replace with your package name
+version = "0.1.2" # Your version
+
+[project.optional-dependencies]
+build = [
+  "setuptools>=61",
+  "wheel",
+  "Cython",
+  "numpy",
+]
+  
+[tool.setuptools.packages.find]
+  where = ["."]
+
+[tool.cython-compile]
+language_level = 3

@@ -103,5 +103,13 @@ $C = I_0 + \frac{E_0 L \omega}{R^2 + L^2 \omega^2}.$
 $I(x) = \left(I_0 + \frac{E_0 L \omega}{R^2 + L^2 \omega^2}\right) e^{-\frac{R}{L}x} + \frac{E_0 R}{R^2 + L^2 \omega^2} \sin(\omega x) - \frac{E_0 L \omega}{R^2 + L^2 \omega^2} \cos(\omega x).$
 
 #### Примечание от автора
-Я пробежался по решению, вроде всё нормально. Если сойдётся решение численно и теоретически, то вообще будет замечательно.
+Я пробежался по решению, вроде всё нормально. Если сойдётся решение численно и теоретически, то вообще будет замечательно. К сожалению сходится только при x0 = 0.
 
+Math GPT $I(x) = \left( I_0 + \frac{E_0 L \omega}{R^2 + L^2 \omega^2} \right) e^{-\frac{R}{L} x} + \frac{E_0 R}{R^2 + L^2 \omega^2} \sin(\omega x) - \frac{E_0 L \omega}{R^2 + L^2 \omega^2} \cos(\omega x)$.
+
+Для сборки calculation требуется 
+pip install setuptools>=61 wheel Cython numpy
+
+cd /path/to/calculation
+python -m build
+pip install dist/calculation-0.1.2-...-.whl

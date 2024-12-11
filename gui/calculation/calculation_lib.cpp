@@ -7,6 +7,7 @@
 #include <queue>
 #include <vector>
 #include <iostream>
+//#include "calculation_lib.h"
 
 #include <cfloat> // Для DBL_MAX
 
@@ -45,7 +46,18 @@ const double EPS = 1e-6;
 const double EPS_OUT = 1e-6;
 const int NMAX = 1000;
 
-
+struct Data {
+    double x;
+    double v;
+    double v2i;
+    double v_minus_v2i;
+    double E;
+    double h;
+    int c1;
+    int c2;
+    double u;
+    double abs_ui_minus_vi;
+};
 
 // // Получаем абсолютный путь к DLL/so/dylib, в которой находится эта функция
 //  std::filesystem::path getThisLibraryPath() {
@@ -89,7 +101,7 @@ const int NMAX = 1000;
 //     Значение функции f(x, y) (double)
 
     double rhs(double x, double I, double L, double R, double E0, double omega) {
-    return (E0 * sin(omega * x) - R * I) / L;
+        return (E0 * sin(omega * x) - R * I) / L;
     }
 
 
@@ -100,7 +112,7 @@ const int NMAX = 1000;
 // Returns:
 //     Значение аналитического решения u(x, C) (double)
 
-    double calculateRealSolution(double x, double L, double R, double E0, double omega, double I0)
+    double calculateRealSolution(double x, double L, double R, double E0, double omega, double I0, double x0)
     {
         // Коэффициенты для решения
         double A = E0 * R / (R * R + L * L * omega * omega);
@@ -108,13 +120,23 @@ const int NMAX = 1000;
         double C = I0 + E0 * L * omega / (R * R + L * L * omega * omega);
 
         // Вычисление значения тока
-        double exponentialPart = C * std::exp(-R * x / L);
+        double exponentialPart = C * std::exp(-R * (x - x0) / L);
         double sinusoidalPart = A * std::sin(omega * x);
         double cosinusoidalPart = B * std::cos(omega * x);
 
         // Итоговое значение
         return exponentialPart + sinusoidalPart + cosinusoidalPart;
     }
+    // double calculateRealSolution(double x, double L, double R, double E0, double omega, double I0, double x0) {
+    //     double numerator = R * exp(R * x0 / L) * I0 - sin(omega*x);
+    //     double denominator = R * exp(R * x / L);
+    //     double term1 = numerator / denominator;
+
+    //     double term2 = E0 * sin(x * omega) / R;
+
+
+    //     return  term1 + term2; 
+    // }
 
 
 // шаг Метод Рунге-Кутта четвертого порядка
@@ -140,9 +162,9 @@ double RK_4_Step(const double &x, const double &y,const double &h, double L, dou
 
     return y_next;
 }
-template <typename Data>
-std::vector<Data> convertQueueToVector(std::queue<Data>& dataQueue) {
-    std::vector<Data> dataVector;
+template <typename T>
+std::vector<T> convertQueueToVector(std::queue<T>& dataQueue) {
+    std::vector<T> dataVector;
     while (!dataQueue.empty()) {
         dataVector.push_back(dataQueue.front());
         dataQueue.pop();
@@ -163,6 +185,7 @@ struct DataRK4 {
     double x;
     double v;
     double abs_ui_minus_vi;
+    double u;
 };
 std::vector<DataRK4> RK_4(double x0, double y0, double h, double xmax, int Nmax, double L, double R, double E0, double omega)
 {
@@ -175,8 +198,9 @@ std::vector<DataRK4> RK_4(double x0, double y0, double h, double xmax, int Nmax,
     while (x+h <= xmax && step < Nmax) {
         y = RK_4_Step(x, y, h, L, R, E0, omega);
         x = x + h;
-        output << x << SEPARATE << y << SEPARATE << calculateRealSolution(x, L, R, E0, omega, y0) << SEPARATE << std::fabs(calculateRealSolution(x, L, R, E0, omega, y0) - y) << std::endl;
-        dataQueue.push({x, y, std::fabs(calculateRealSolution(x, L, R, E0, omega, y0) - y)});
+        double realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+        output << x << SEPARATE << y << SEPARATE << realSolution << SEPARATE << std::fabs(realSolution - y) << std::endl;
+        dataQueue.push({x, y, std::fabs(realSolution - y), realSolution});
         ++step;
         
     }
@@ -196,22 +220,11 @@ std::vector<DataRK4> RK_4(double x0, double y0, double h, double xmax, int Nmax,
 // Returns:
 //     0 - если вычисления прошли успешно
 
-struct Data {
-    double x;
-    double v;
-    double v2i;
-    double v_minus_v2i;
-    double E;
-    double h;
-    int c1;
-    int c2;
-    double u;
-    double abs_ui_minus_vi;
-};
+
 
 
 // Функция для добавления данных в очередь
-void addData(std::queue<Data>& q, double x, double y, double y2, double error, int p, double h, int c1, int c2, double y0, double L, double R, double E0, double omega) {
+void addData(std::queue<Data>& q, double x, double y, double y2, double error, int p, double h, int c1, int c2, double y0, double L, double R, double E0, double omega, double x0) {
     Data data;
     data.x = x;
     data.v = y;
@@ -221,8 +234,8 @@ void addData(std::queue<Data>& q, double x, double y, double y2, double error, i
     data.h = h;
     data.c1 = c1;
     data.c2 = c2;
-    data.u = calculateRealSolution(x, L, R, E0, omega, y0);
-    data.abs_ui_minus_vi = std::fabs(calculateRealSolution(x, L, R, E0, omega, y0) - y);
+    data.u = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+    data.abs_ui_minus_vi = std::fabs(calculateRealSolution(x, L, R, E0, omega, y0, x0) - y);
     q.push(data);
 }
 
@@ -267,10 +280,10 @@ std::vector<Data> RK_4_adaptive(double x0, double y0, double h0, double xmax, do
             c2++;
 
             //2^p
-            output << x << SEPARATE << y << SEPARATE << y2 << SEPARATE << y-y2 << SEPARATE << error * pow(2, p) << SEPARATE << h << SEPARATE << c1 << SEPARATE << c2 << SEPARATE << calculateRealSolution(x, L, R, E0, omega, y0) << SEPARATE << std::fabs(calculateRealSolution(x, L, R, E0, omega, y0) - y) << std::endl;
+            output << x << SEPARATE << y << SEPARATE << y2 << SEPARATE << y-y2 << SEPARATE << error * pow(2, p) << SEPARATE << h << SEPARATE << c1 << SEPARATE << c2 << SEPARATE << calculateRealSolution(x, L, R, E0, omega, y0, x0) << SEPARATE << std::fabs(calculateRealSolution(x, L, R, E0, omega, y0, x0) - y) << std::endl;
             
             // Добавить данные в очередь
-            addData(dataQueue, x, y, y2, error, p, h, c1, c2, y0, L, R, E0, omega);
+            addData(dataQueue, x, y, y2, error, p, h, c1, c2, y0, L, R, E0, omega, x0);
 
             h *= 2;
             ++step;
@@ -280,10 +293,11 @@ std::vector<Data> RK_4_adaptive(double x0, double y0, double h0, double xmax, do
             y = y1;
             x += h;  //Увеличиваем шаг перед выводом, т.к. метод Р.К. считает значение в следующей точке
             //2^p
-            output << x << SEPARATE << y << SEPARATE << y2 << SEPARATE << y-y2 << SEPARATE << error * pow(2, p) << SEPARATE << h << SEPARATE << c1 << SEPARATE << c2 << SEPARATE << calculateRealSolution(x, L, R, E0, omega, y0) << SEPARATE << std::fabs(calculateRealSolution(x, L, R, E0, omega, y0) - y) << std::endl;
+            double realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+            output << x << SEPARATE << y << SEPARATE << y2 << SEPARATE << y-y2 << SEPARATE << error * pow(2, p) << SEPARATE << h << SEPARATE << c1 << SEPARATE << c2 << SEPARATE << realSolution << SEPARATE << std::fabs(realSolution - y) << std::endl;
             
             // Добавить данные в очередь
-            addData(dataQueue, x, y, y2, error, p, h, c1, c2, y0, L, R, E0, omega);
+            addData(dataQueue, x, y, y2, error, p, h, c1, c2, y0, L, R, E0, omega, x0);
 
             ++step;
         }
@@ -297,8 +311,8 @@ std::vector<Data> RK_4_adaptive(double x0, double y0, double h0, double xmax, do
         y1 = RK_4_Step(x, y, h, L, R, E0, omega);
         y2 = RK_4_Step(x, y, h / 2, L, R, E0, omega);
         y2 = RK_4_Step(x + h / 2, y2, h / 2, L, R, E0, omega);
-
-        output << x+h << SEPARATE << y1 << SEPARATE << y2 << SEPARATE << y1-y2 << SEPARATE << error * pow(2, p) << SEPARATE << h << SEPARATE << c1 << SEPARATE << c2 << SEPARATE << calculateRealSolution(x, L, R, E0, omega, y0) << SEPARATE << std::fabs(calculateRealSolution(x, L, R, E0, omega, y0) - y) << std::endl;
+        double realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+        output << x+h << SEPARATE << y1 << SEPARATE << y2 << SEPARATE << y1-y2 << SEPARATE << error * pow(2, p) << SEPARATE << h << SEPARATE << c1 << SEPARATE << c2 << SEPARATE << realSolution << SEPARATE << std::fabs(realSolution - y) << std::endl;
 
     }
 
@@ -316,15 +330,15 @@ int main()
 {
     setlocale(LC_ALL, "Russian");
 
-    // RK_4_adaptive(X0, Y0, H0, XMAX, EPS, EPS_OUT, NMAX, 1, 1, 1, 1);
-    std::vector<Data> results = RK_4_adaptive(X0, Y0, H0, XMAX, EPS, EPS_OUT, NMAX, 1, 1, 1, 0);
+    RK_4_adaptive(1, Y0, H0, XMAX, EPS, EPS_OUT, NMAX, 1, 1, 1, 1);
+    // std::vector<Data> results = RK_4_adaptive(X0, Y0, H0, XMAX, EPS, EPS_OUT, NMAX, 1, 1, 1, 0);
 
-    for (const auto& result : results) {
-        std::cout << "x: " << result.x << ", v: " << result.v << ", v2i: " << result.v2i 
-                  << ", v-v2i: " << result.v_minus_v2i << ", E: " << result.E 
-                  << ", h: " << result.h << ", c1: " << result.c1 << ", c2: " << result.c2 
-                  << ", u: " << result.u << ", |ui-vi|: " << result.abs_ui_minus_vi << std::endl;
-    }
+    // for (const auto& result : results) {
+    //     std::cout << "x: " << result.x << ", v: " << result.v << ", v2i: " << result.v2i 
+    //               << ", v-v2i: " << result.v_minus_v2i << ", E: " << result.E 
+    //               << ", h: " << result.h << ", c1: " << result.c1 << ", c2: " << result.c2 
+    //               << ", u: " << result.u << ", |ui-vi|: " << result.abs_ui_minus_vi << std::endl;
+    // }
 
     //RK_4(X0, Y0, H0, XMAX, NMAX, 1, 1, 1, 0);
 
