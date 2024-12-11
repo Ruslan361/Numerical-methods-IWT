@@ -21,7 +21,7 @@ class ReportGenerator:
 
     def generate_error_report(self, report, x, symbol):
         if symbol in self.df.columns:  # Проверка наличия столбца 'e'
-            E = self.getColumnValues('e')
+            E = self.getColumnValues(symbol)
             maxError = max(E)
             max_error_index = E.index(maxError)
             report += f'Максимальное значение ОЛП {maxError} при x = {x[max_error_index]}\n'

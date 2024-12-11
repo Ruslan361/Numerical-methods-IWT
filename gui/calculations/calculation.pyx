@@ -15,7 +15,7 @@ def rk4_adaptive(
         'v': [data.v for data in result],
         'v2i': [data.v2i for data in result],
         'v_minus_v2i': [data.v_minus_v2i for data in result],
-        'e': [data.E for data in result],
+        'e': [data.e for data in result],
         'h': [data.h for data in result],
         'c1': [data.c1 for data in result],
         'c2': [data.c2 for data in result],
