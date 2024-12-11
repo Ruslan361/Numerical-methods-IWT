@@ -9,7 +9,7 @@ class TestTaskPlotter:
         self.graph_layout.clear()
 
         if self.show_numeric_solve_checkbox.isChecked():
-            self.graph_layout.plot(x, v, label="Численное решение")
+            self.graph_layout.plot(x, v, '--', label="Численное решение")
 
         if self.show_real_solve_checkbox.isChecked():
             #print(f"x {x} \ny {u}")

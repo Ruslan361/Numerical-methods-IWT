@@ -33,8 +33,8 @@ class GraphLayout(QVBoxLayout):
     def set_title(self, title):
         self.canvas.set_title(title)
 
-    def plot(self, X, Y, label=''):
-        self.canvas.plot(X, Y, label)
+    def plot(self, *args, **kwargs):
+        self.canvas.plot(*args, **kwargs)
 
     def draw(self):
         self.canvas.Draw()
@@ -110,8 +110,8 @@ class MatplotlibGraph(FigureCanvas):
     def set_title(self, title):
         self.ax.set_title(title)
 
-    def plot(self, X, Y, label=''):
-        self.ax.plot(X, Y, label=label)
+    def plot(self, *args, **kwargs):
+        self.ax.plot(*args, **kwargs)
 
     def Draw(self):
         self.draw()
