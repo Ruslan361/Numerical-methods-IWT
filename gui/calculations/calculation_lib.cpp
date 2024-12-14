@@ -194,11 +194,13 @@ std::vector<DataRK4> RK_4(double x0, double y0, double h, double xmax, int Nmax,
     double y = y0;
     std::queue<DataRK4> dataQueue; // Добавить очередь DataRK4
     std::ofstream output("output_test.csv");
+    double realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+    dataQueue.push({x, y, std::fabs(realSolution - y), realSolution});
     output << "x;v;u;|ui-vi|" << std::endl;     // Заголовок CSV с разделителем ;
     while (x+h <= xmax && step < Nmax) {
         y = RK_4_Step(x, y, h, L, R, E0, omega);
         x = x + h;
-        double realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+        realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
         output << x << SEPARATE << y << SEPARATE << realSolution << SEPARATE << std::fabs(realSolution - y) << std::endl;
         dataQueue.push({x, y, std::fabs(realSolution - y), realSolution});
         ++step;
@@ -257,6 +259,8 @@ std::vector<Data> RK_4_adaptive(double x0, double y0, double h0, double xmax, do
     std::ofstream output("output_test.csv");
  
     output << "x;v;v2i;v-v2i;E;h;c1;c2;u;|ui-vi|" << std::endl;
+    double startRealSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+    dataQueue.push({x, y, std::fabs(startRealSolution - y), startRealSolution});
 
     while (x + h <= xmax && std::abs(x - xmax) > eps_out && step < Nmax) {
 
@@ -313,7 +317,8 @@ std::vector<Data> RK_4_adaptive(double x0, double y0, double h0, double xmax, do
         y2 = RK_4_Step(x + h / 2, y2, h / 2, L, R, E0, omega);
         double realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
         output << x+h << SEPARATE << y1 << SEPARATE << y2 << SEPARATE << y1-y2 << SEPARATE << error * pow(2, p) << SEPARATE << h << SEPARATE << c1 << SEPARATE << c2 << SEPARATE << realSolution << SEPARATE << std::fabs(realSolution - y) << std::endl;
-
+        // Добавить данные в очередь
+        addData(dataQueue, x+h, y, y2, error, p, h, c1, c2, y0, L, R, E0, omega, x0);
     }
 
 

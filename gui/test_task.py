@@ -96,7 +96,7 @@ class TabTestTask(QWidget):
             R = self.ui.R_input.getFloatNumber()
             E0 = self.ui.E0_input.getFloatNumber()
             omega = self.ui.omega_input.getFloatNumber()
-            print(f"{self.to_be_control_local_error}")
+            #print(f"{self.to_be_control_local_error}")
             if self.to_be_control_local_error:
                 self.df = self.rk4_adaptive_calculator.calculate(x0, u_x0, h0, x_end, local_error, epsilon_border, amountOfSteps, L, R, E0, omega)
             else:
@@ -119,6 +119,7 @@ class TabTestTask(QWidget):
 
         dialog = QDialog(self)
         dialog.setWindowTitle("Таблица результатов")
+        dialog.resize(800, 600)
         layout = QVBoxLayout(dialog)
         table = QTableWidget()
         layout.addWidget(table)
@@ -131,11 +132,11 @@ class TabTestTask(QWidget):
         table.setColumnCount(len(self.columns))
         table.setRowCount(len(self.df))
         table.setHorizontalHeaderLabels(self.columns)
-        self.data = self.df.values.tolist()[1:]
+        self.data = self.df.values.tolist()
         for row, data_row in enumerate(self.data):
             for col, value in enumerate(data_row):
                 if col < len(self.columns):  # Проверка на выход за пределы списка columns
-                    item = QTableWidgetItem(str(value))
+                    item = QTableWidgetItem(f"{value}")
                     table.setItem(row, col, item)
 
         dialog.exec()
