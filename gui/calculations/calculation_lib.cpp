@@ -259,8 +259,8 @@ std::vector<Data> RK_4_adaptive(double x0, double y0, double h0, double xmax, do
     std::ofstream output("output_test.csv");
  
     output << "x;v;v2i;v-v2i;E;h;c1;c2;u;|ui-vi|" << std::endl;
-    double startRealSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
-    dataQueue.push({x, y, std::fabs(startRealSolution - y), startRealSolution});
+    // double startRealSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+    // dataQueue.push({x, y, std::fabs(startRealSolution - y), startRealSolution});
 
     while (x + h <= xmax && std::abs(x - xmax) > eps_out && step < Nmax) {
 

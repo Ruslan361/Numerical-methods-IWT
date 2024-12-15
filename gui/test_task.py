@@ -172,7 +172,7 @@ class TabTestTask(QWidget):
             self.show_error(f"Ошибка во время загрузки: {e}")
 
     def getColumnValues(self, df, column):
-        return pd.to_numeric(df[column][1:], errors='coerce').dropna().tolist()
+        return pd.to_numeric(df[column], errors='coerce').dropna().tolist()
 
     def saveSettings(self):
         if self.df is not None:
