@@ -194,13 +194,13 @@ std::vector<DataRK4> RK_4(double x0, double y0, double h, double xmax, int Nmax,
     double y = y0;
     std::queue<DataRK4> dataQueue; // Добавить очередь DataRK4
     std::ofstream output("output_test.csv");
-    double realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
-    dataQueue.push({x, y, std::fabs(realSolution - y), realSolution});
+    // double realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+    // dataQueue.push({x, y, std::fabs(realSolution - y), realSolution});
     output << "x;v;u;|ui-vi|" << std::endl;     // Заголовок CSV с разделителем ;
     while (x+h <= xmax && step < Nmax) {
         y = RK_4_Step(x, y, h, L, R, E0, omega);
         x = x + h;
-        realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
+        double realSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
         output << x << SEPARATE << y << SEPARATE << realSolution << SEPARATE << std::fabs(realSolution - y) << std::endl;
         dataQueue.push({x, y, std::fabs(realSolution - y), realSolution});
         ++step;

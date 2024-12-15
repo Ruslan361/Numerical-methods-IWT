@@ -136,6 +136,7 @@ class TabTestTask(QWidget):
         for row, data_row in enumerate(self.data):
             for col, value in enumerate(data_row):
                 if col < len(self.columns):  # Проверка на выход за пределы списка columns
+                    # Если нужно, можно добавить форматирование значений, например f"{value:.2e}" или f"{value:.2f}"
                     item = QTableWidgetItem(f"{value}")
                     table.setItem(row, col, item)
 
