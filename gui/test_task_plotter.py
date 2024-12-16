@@ -17,10 +17,10 @@ class TestTaskPlotter:
 
         # Заголовок выводится только один раз при инициализации
         if self.graph_layout.canvas.ax.get_title() == '':
-            self.graph_layout.set_title("График решения")
+            self.graph_layout.set_title("График зависимости силы тока от времени")
 
         self.graph_layout.set_xlabel("x")
-        self.graph_layout.set_ylabel("u(x)")
+        self.graph_layout.set_ylabel("V(x)")
         if (self.show_real_solve_checkbox.isChecked() or self.show_numeric_solve_checkbox.isChecked()):
             self.graph_layout.legend()
         self.graph_layout.draw()

@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Меню выбора вкладок")
+        self.setWindowTitle("Алпутов Иван ПМоп3")
 
         # Создание основного виджета QTabWidget
         self.tab_widget = QTabWidget()

@@ -6,22 +6,25 @@ class ReportGenerator:
         self.df = df
         self.xlimits_input = xlimits_input
 
-    def generate_report(self):
+    def generate_report(self, x0, Ux0, u_x0):
         report = ""
-        amountOfIterations = len(self.df['x']) - 1
+        amountOfIterations = len(self.df['x'])
         report += f"Количество итераций: {amountOfIterations} \n"
         x = self.getColumnValues('x')
         l = len(x)
         difference_between_the_right_border_and_the_last_calculated_point = abs(
             x[l - 1] - self.xlimits_input.getEndX())
         report += f'разница между правой границей и последней вычисленной точки: {difference_between_the_right_border_and_the_last_calculated_point}\n'
-        report += self.generate_error_report(report, x, symbol='e')
-        report += self.generate_error_report(report, x, symbol='E')
+        report += self.generate_error_report("", x, symbol='e')
+        report += self.generate_error_report("", x, symbol='E')
         u = np.array(self.getColumnValues('u'), dtype=np.float64)
         v = np.array(self.getColumnValues('v'), dtype=np.float64)
         difference = np.abs(u - v)
         maxDifference = np.max(difference)
-        report += f'Максимальная разница численного и реального решения {maxDifference}'
+        report += f'Максимальная разница численного и реального решения {maxDifference}\n'
+        report += f'Начальная и последняя точка численной траектории\n'
+        report += f'x0 = {x0} u0 = {Ux0} v0 = {u_x0}\n'
+        report += f'xn = {x[l - 1]} un = {u[l - 1]} vn = {v[l - 1]}\n'
         return report
 
     def generate_error_report(self, report, x, symbol):

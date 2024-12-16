@@ -10,7 +10,7 @@
             "-std=c++11"
         ],
         "include_dirs": [
-            "/tmp/build-env-uuwf4wmq/lib/python3.11/site-packages/numpy/_core/include",
+            "/tmp/build-env-t_1oatrc/lib/python3.11/site-packages/numpy/_core/include",
             "."
         ],
         "language": "c++",

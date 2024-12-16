@@ -1,0 +1,27 @@
+{
+    "initialConditions": {
+        "X0": "0",
+        "UX0": "0"
+    },
+    "xlimits": {
+        "endX": "25",
+        "epsilonBorder": "1e-6"
+    },
+    "numericalIntegrationParameters": {
+        "h0": "0.01",
+        "controlLocalError": true,
+        "epsilon": "1e-6",
+        "to_be_control_local_error": true
+    },
+    "additionalParameters": {
+        "omega": "3",
+        "R": "22",
+        "L": "30",
+        "E0": "200"
+    },
+    "showNumericSolve": true,
+    "showRealSolve": true,
+    "amountOfSteps": "100000",
+    "csv_filename": "stabilnoe_sosto.csv",
+    "task_number": 0
+}

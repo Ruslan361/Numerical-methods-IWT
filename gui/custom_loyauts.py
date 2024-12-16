@@ -149,7 +149,7 @@ class FloatNumberInput(QHBoxLayout):
         self.addWidget(self.floatNumberLineEdit)
     def getFloatNumber(self):
         FloatNumberString = self.floatNumberLineEdit.text()
-        return float(FloatNumberString)
+        return float(FloatNumberString.replace(',', '.'))
     def setReadOnly(self, state):
         self.floatNumberLineEdit.setReadOnly(state)
     
@@ -199,7 +199,7 @@ class ScalarStartConditions(QVBoxLayout):
         initialConditionsLoyaut = QHBoxLayout()
         self.X0Input = FloatNumberInput('X0')
         initialConditionsLoyaut.addLayout(self.X0Input)
-        self.UX0Input = FloatNumberInput('U(X0)')
+        self.UX0Input = FloatNumberInput('I(X0)')
         initialConditionsLoyaut.addLayout(self.UX0Input)
         self.addLayout(initialConditionsLoyaut)
 
@@ -220,7 +220,7 @@ class NumericalIntegrationParametersInput(QVBoxLayout):
         self.controlLocalErrorCheckBox.stateChanged.connect(self.controlLocalErrorCheckBoxStateChanged)
         self.addWidget(self.controlLocalErrorCheckBox)
 
-        self.epsilonInput = FloatNumberInput('Параметр локальной ошибки')
+        self.epsilonInput = FloatNumberInput('Параметр контроля локальной погрешности')
         mainLoyaut.addLayout(self.epsilonInput)
         self.addLayout(mainLoyaut)
     def controlLocalErrorCheckBoxStateChanged(self):

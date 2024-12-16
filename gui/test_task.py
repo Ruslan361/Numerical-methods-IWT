@@ -105,6 +105,26 @@ class TabTestTask(QWidget):
             self.show_error(f"Ошибка во время вычислений: {e}")
 
     def refreshPlot(self):
+        x0 = self.ui.initial_conditions.getX0()
+        u_x0 = self.ui.initial_conditions.getUX0()
+        L = self.ui.L_input.getFloatNumber()
+        R = self.ui.R_input.getFloatNumber()
+        E0 = self.ui.E0_input.getFloatNumber()
+        omega = self.ui.omega_input.getFloatNumber()
+        A = E0 * R / (R * R + L * L * omega * omega)
+        B = -E0 * L * omega / (R * R + L * L * omega * omega)
+        C = u_x0 + E0 * L * omega / (R * R + L * L * omega * omega)
+        exponentialPart = C * np.exp(-R * (x0 - x0) / L)
+        sinusoidalPart = A * np.sin(omega * x0)
+        cosinusoidalPart = B * np.cos(omega * x0)
+        Ux0 = exponentialPart + sinusoidalPart + cosinusoidalPart
+        if self.df is not None:
+            X = self.getColumnValues(self.df, 'x')
+            X.insert(0, x0)
+            V = self.getColumnValues(self.df, 'v')
+            V.insert(0, u_x0)
+            U = self.getColumnValues(self.df, 'u')
+            U.insert(0, Ux0)
         if self.df is not None:
             self.plotter.plot(self.getColumnValues(self.df, 'x'), self.getColumnValues(self.df, 'v'), self.getColumnValues(self.df, 'u'))
 
@@ -125,14 +145,48 @@ class TabTestTask(QWidget):
         layout.addWidget(table)
 
         if self.ui.numerical_integration_parameters_input.isControlLocalError():
-            self.columns = ['x', 'v', 'v2i', 'v-v2i', 'e', 'h', 'c1', 'c2', 'u', '|ui-vi|']
+            self.columns = ['x', 'v', 'v2i', 'v-v2i', 'ОЛП', 'h', 'c1', 'c2', 'u', '|ui-vi|']
         else:
             self.columns = ['x', 'v', 'u', '|ui-vi|']
 
         table.setColumnCount(len(self.columns))
-        table.setRowCount(len(self.df))
+        table.setRowCount(len(self.df) + 1)
         table.setHorizontalHeaderLabels(self.columns)
         self.data = self.df.values.tolist()
+        x0 = self.ui.initial_conditions.getX0()
+        u_x0 = self.ui.initial_conditions.getUX0()
+        L = self.ui.L_input.getFloatNumber()
+        R = self.ui.R_input.getFloatNumber()
+        E0 = self.ui.E0_input.getFloatNumber()
+        omega = self.ui.omega_input.getFloatNumber()
+        A = E0 * R / (R * R + L * L * omega * omega)
+        B = -E0 * L * omega / (R * R + L * L * omega * omega)
+        C = u_x0 + E0 * L * omega / (R * R + L * L * omega * omega)
+        exponentialPart = C * np.exp(-R * (x0 - x0) / L)
+        sinusoidalPart = A * np.sin(omega * x0)
+        cosinusoidalPart = B * np.cos(omega * x0)
+        Ux0 = exponentialPart + sinusoidalPart + cosinusoidalPart
+        """
+            double calculateRealSolution(double x, double L, double R, double E0, double omega, double I0, double x0)
+    {
+        // Коэффициенты для решения
+        double A = E0 * R / (R * R + L * L * omega * omega);
+        double B = -E0 * L * omega / (R * R + L * L * omega * omega);
+        double C = I0 + E0 * L * omega / (R * R + L * L * omega * omega);
+
+        // Вычисление значения тока
+        double exponentialPart = C * std::exp(-R * (x - x0) / L);
+        double sinusoidalPart = A * std::sin(omega * x);
+        double cosinusoidalPart = B * std::cos(omega * x);
+
+        // Итоговое значение
+        return exponentialPart + sinusoidalPart + cosinusoidalPart;
+    }
+        """
+        if self.ui.numerical_integration_parameters_input.isControlLocalError():
+            self.data.insert(0, [x0, u_x0, "---", "---", "---", "---", "---", "---", Ux0, np.abs(Ux0 - u_x0)])
+        else:
+            self.data.insert(0,[x0, u_x0, Ux0, np.abs(Ux0 - u_x0)])
         for row, data_row in enumerate(self.data):
             for col, value in enumerate(data_row):
                 if col < len(self.columns):  # Проверка на выход за пределы списка columns
@@ -149,7 +203,20 @@ class TabTestTask(QWidget):
 
         try:
             report_generator = ReportGenerator(self.df, self.ui.xlimits_input)
-            report = report_generator.generate_report()
+            x0 = self.ui.initial_conditions.getX0()
+            u_x0 = self.ui.initial_conditions.getUX0()
+            L = self.ui.L_input.getFloatNumber()
+            R = self.ui.R_input.getFloatNumber()
+            E0 = self.ui.E0_input.getFloatNumber()
+            omega = self.ui.omega_input.getFloatNumber()
+            A = E0 * R / (R * R + L * L * omega * omega)
+            B = -E0 * L * omega / (R * R + L * L * omega * omega)
+            C = u_x0 + E0 * L * omega / (R * R + L * L * omega * omega)
+            exponentialPart = C * np.exp(-R * (x0 - x0) / L)
+            sinusoidalPart = A * np.sin(omega * x0)
+            cosinusoidalPart = B * np.cos(omega * x0)
+            Ux0 = exponentialPart + sinusoidalPart + cosinusoidalPart
+            report = report_generator.generate_report(x0, u_x0, Ux0)
 
             window = NewWindow('Справка', report)
             window.show()

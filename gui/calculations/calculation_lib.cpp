@@ -38,6 +38,14 @@
 // EPS_OUT - точность выхода
 // NMAX - максимальное число шагов
 
+// const double X0 = 0.0;
+// const double Y0 = 1.0;
+// const double H0 = 0.1;
+// const double XMAX = 10;
+// const double EPS = 1e-6;
+// const double EPS_OUT = 1e-6;
+// const int NMAX = 1000;
+
 const double X0 = 0.0;
 const double Y0 = 1.0;
 const double H0 = 0.1;
@@ -102,6 +110,7 @@ struct Data {
 
     double rhs(double x, double I, double L, double R, double E0, double omega) {
         return (E0 * sin(omega * x) - R * I) / L;
+        //return I;
     }
 
 
@@ -262,7 +271,7 @@ std::vector<Data> RK_4_adaptive(double x0, double y0, double h0, double xmax, do
     // double startRealSolution = calculateRealSolution(x, L, R, E0, omega, y0, x0);
     // dataQueue.push({x, y, std::fabs(startRealSolution - y), startRealSolution});
 
-    while (x + h <= xmax && std::abs(x - xmax) > eps_out && step < Nmax) {
+    while (x + h < xmax && std::abs(x - xmax) > eps_out && step < Nmax) {
 
         // Делаем шаг методом Рунге-Кутта с h и два шага с h/2
         y1 = RK_4_Step(x, y, h, L, R, E0, omega);
@@ -275,20 +284,20 @@ std::vector<Data> RK_4_adaptive(double x0, double y0, double h0, double xmax, do
         // Проверяем, соответствует ли оценка погрешности заданной точности
         if (error > eps) {
             h=h/2;
-            ++step;
+            //++step;
             c1++;
         }
         else if( error < eps / pow(2, p + 1) ) {  //2^(p+1)
             y = y1;
             x += h;  //Увеличиваем шаг перед выводом, т.к. метод Р.К. считает значение в следующей точке
-            c2++;
+            
 
             //2^p
             output << x << SEPARATE << y << SEPARATE << y2 << SEPARATE << y-y2 << SEPARATE << error * pow(2, p) << SEPARATE << h << SEPARATE << c1 << SEPARATE << c2 << SEPARATE << calculateRealSolution(x, L, R, E0, omega, y0, x0) << SEPARATE << std::fabs(calculateRealSolution(x, L, R, E0, omega, y0, x0) - y) << std::endl;
             
             // Добавить данные в очередь
             addData(dataQueue, x, y, y2, error, p, h, c1, c2, y0, L, R, E0, omega, x0);
-
+            c2++;
             h *= 2;
             ++step;
   
